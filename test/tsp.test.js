@@ -15,11 +15,11 @@ mocha.beforeEach(async () => {
 
   tsp = await new web3.eth.Contract(JSON.parse(interf))
     .deploy({ data: bytecode, arguments: [123, '123'] })
-    .send({ from: accounts[0], gas: '1000000' });
+    .send({ from: accounts[0], gas: '1000000', value: 10 });
 });
 
-mocha.describe('Lottery contract', () => {
-  mocha.it('Deploys a contract', () => {
+mocha.describe('TSPInstance contract', () => {
+  mocha.it('Deploys a contract', async () => {
     assert.ok(tsp.options.address);
   });
 });
