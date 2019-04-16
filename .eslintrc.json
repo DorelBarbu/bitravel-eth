@@ -19,6 +19,8 @@
   "plugins": ["react"],
   "rules": {
     "comma-dangle": ["error", "never"],
-    "arrow-parens": 0
+    "arrow-parens": 0,
+    "guard-for-in": "off",
+    "no-restricted-syntax": "off"
   }
 }
