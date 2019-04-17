@@ -68,13 +68,16 @@ contract TSPInstance {
 
 contract TSPInstanceFactory {
     address[] public deployedTSPInstances;
+
+    function TSPInstanceFactory() public payable {}
     
-    function createTSPInstance(uint size, string tspAddress) public {
+    function createTSPInstance(uint size, string tspAddress) public payable returns(TSPInstance) {
         TSPInstance newTSPInstance = new TSPInstance(size, tspAddress);
         deployedTSPInstances.push(newTSPInstance);
+        return newTSPInstance;
     }
     
     function getDeployedTSPInstances() public view returns(address[])  {
         return deployedTSPInstances;
-    } 
+    }
 }

@@ -2,24 +2,66 @@ const mocha = require('mocha');
 const assert = require('assert');
 const ganache = require('ganache-cli');
 const Web3 = require('web3');
+const fs = require('fs');
+const path = require('path');
+const Logger = require('../logger');
 
 const web3 = new Web3(ganache.provider());
 
-const { interf, bytecode } = require('../compile');
+const compiledFactoryContractPath = path.resolve('build', 'TSPInstanceFactory.json');
+const compiledFactoryContract = JSON.parse(fs.readFileSync(compiledFactoryContractPath, 'utf8'));
 
+const compiledTSPPath = path.resolve('build', 'TSPInstance.json');
+const compiledTSPContract = JSON.parse(fs.readFileSync(compiledTSPPath, 'utf8'));
+
+/* The deployed tsp factory contracts */
+let tspFactory;
+/* The deployed tsp contract */
 let tsp;
+/* A list of all the accounts available */
 let accounts;
+/* The address of the tsp instance */
+let tspInstanceAddress;
 
 mocha.beforeEach(async () => {
   accounts = await web3.eth.getAccounts();
-
-  tsp = await new web3.eth.Contract(JSON.parse(interf))
-    .deploy({ data: bytecode, arguments: [123, '123'] })
-    .send({ from: accounts[0], gas: '1000000', value: 10 });
+  // const { bytecode, interface } = compiledFactoryContract;
+  try {
+    /* Deploy a factory contract */
+    let interf = compiledFactoryContract.interface;
+    let { bytecode } = compiledFactoryContract;
+    tspFactory = await new web3.eth.Contract(JSON.parse(interf))
+      .deploy({ data: bytecode })
+      .send({ from: accounts[0], gas: '1000000' });
+    /* Deploy a contract using the factory contract */
+    await tspFactory.methods.createTSPInstance(12, 'mognodbid').send({
+      from: accounts[0],
+      gas: '1000000'
+    });
+    /* Get the deployed campaigns */
+    [tspInstanceAddress] = await tspFactory.methods.getDeployedTSPInstances().call();
+    /* Deploy a tsp contract */
+    interf = compiledTSPContract.interface;
+    // eslint-disable-next-line prefer-destructuring
+    bytecode = compiledTSPContract.bytecode;
+    tsp = await new web3.eth.Contract(JSON.parse(interf), tspInstanceAddress);
+  } catch (err) {
+    Logger.err('Error deploying TSP contract');
+    Logger.msg(err);
+  }
 });
 
-mocha.describe('TSPInstance contract', () => {
-  mocha.it('Deploys a contract', async () => {
+mocha.describe('TSPFactoryInstance contract', () => {
+  /* Tests to see if creating a factory contract is successful */
+  mocha.it('Deploys a TSPInstanceFactory contract', () => {
+    assert.ok(tspFactory.options.address);
+  });
+  /* Tests to see if we can successfully deploy a TSPInstance */
+  mocha.it('Deploys a TSPInstance contract', () => {
     assert.ok(tsp.options.address);
+  });
+  /* Tests to see if we can successfully deploy a TSPInstance contract using TSPInstanceFactory */
+  mocha.it('Deploys using TSPFactory', () => {
+    assert.equal(tsp.options.address, tspInstanceAddress);
   });
 });
