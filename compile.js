@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const solc = require('solc');
+const Logger = require('./logger');
 
 const compileContract = filename => {
   const contractPath = path.resolve(__dirname, 'contracts', `${filename}.sol`);
@@ -10,12 +11,8 @@ const compileContract = filename => {
     const outputPath = path.resolve(__dirname, 'build', `${contract.slice(1)}.json`);
     fs.writeFileSync(outputPath, JSON.stringify(compiledContracts[contract]));
   }
+  Logger.success('Successfully compiled contracts');
   return compiledContracts;
 };
 
-const compiledContracts = compileContract('TSPInstance');
-
-module.exports = {
-  bytecode: compiledContracts[':TSPInstanceFactory'].bytecode,
-  interf: compiledContracts[':TSPInstanceFactory'].interface
-};
+module.exports = compileContract;
