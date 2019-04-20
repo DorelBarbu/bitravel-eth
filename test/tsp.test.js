@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 const mocha = require('mocha');
 const assert = require('assert');
 const ganache = require('ganache-cli');
@@ -5,7 +6,7 @@ const Web3 = require('web3');
 const fs = require('fs');
 const path = require('path');
 const Logger = require('../logger');
-const Graph = require('../tsp-graph/graph.js');
+const Graph = require('../tsp-graph/graph');
 const Node = require('../tsp-graph/node');
 
 const web3 = new Web3(ganache.provider());
@@ -83,12 +84,30 @@ mocha.describe('Graph class test', () => {
     assert.ok(newNode);
   });
   mocha.it('Creates a graph', () => {
-    const cities = ['Bucharest', 'Rome', 'Milano'];
+    const graph = new Graph();
+    assert.equal(graph.numberOfNodes, 0);
+    assert.equal(graph.numberOfEdges, 0);
+    const cities = ['Bucharest', 'Rome', 'Milano', 'Amsterdam', 'Viena', 'Madrid', 'Venezia', 'Cluj'];
     const numberOfCities = cities.length;
     let index = 0;
-    let cost = 0;
+    let cost = 10;
     for (let i = 0; i < numberOfCities; i++) {
-      for (let j = i + 1; j < numberOfCities; j++) {}
+      const newNode1 = new Node(index, cities[i]);
+      index++;
+      for (let j = 0; j < numberOfCities; j++) {
+        if (i !== j) {
+          const newNode2 = new Node(index, cities[j], cost);
+          index++;
+          cost += 10;
+          graph.addEdge(newNode1, newNode2);
+        }
+      }
     }
+    let distinctNodes = 0;
+    for (const node in graph.edges) {
+      distinctNodes++;
+      assert.equal(graph.edges[node].length, numberOfCities - 1);
+    }
+    assert.equal(distinctNodes, numberOfCities);
   });
 });

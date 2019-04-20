@@ -1,8 +1,7 @@
 class Node {
-  constructor(index, source, destination, cost) {
+  constructor(index, location, cost = 0) {
     this.index = index;
-    this.source = source;
-    this.destination = destination;
+    this.location = location;
     this.cost = cost;
   }
 }

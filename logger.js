@@ -18,6 +18,11 @@ class Logger {
     // eslint-disable-next-line no-console
     console.log(message);
   }
+
+  static obj(obj) {
+    // eslint-disable-next-line no-console
+    console.log(JSON.parse(JSON.stringify(obj)));
+  }
 }
 
 module.exports = Logger;
