@@ -1,17 +1,19 @@
 /* eslint-disable no-plusplus */
 const mocha = require('mocha');
-const axios = require('axios');
 const assert = require('assert');
-const ganache = require('ganache-cli');
-const Web3 = require('web3');
 const fs = require('fs');
 const path = require('path');
+const chai = require('chai');
+const chaiHttp = require('chai-http');
 const app = require('../src/routes/router');
 const Logger = require('../logger');
 const Graph = require('../tsp-graph/graph');
 const Node = require('../tsp-graph/node');
+const web3 = require('../src/utils/web3');
 
-const web3 = new Web3(ganache.provider());
+// Configure chai
+chai.use(chaiHttp);
+chai.should();
 
 const compiledFactoryContractPath = path.resolve('build', 'TSPInstanceFactory.json');
 const compiledFactoryContract = JSON.parse(fs.readFileSync(compiledFactoryContractPath, 'utf8'));
@@ -28,9 +30,9 @@ let accounts;
 /* The address of the tsp instance */
 let tspInstanceAddress;
 
+
 mocha.beforeEach(async () => {
   accounts = await web3.eth.getAccounts();
-  // const { bytecode, interface } = compiledFactoryContract;
   try {
     /* Deploy a factory contract */
     let interf = compiledFactoryContract.interface;
@@ -114,16 +116,40 @@ mocha.describe('Graph class test', () => {
   });
 });
 
-mocha.describe('Contract route', () => {
-  app.listen('3000', () => {
-    mocha.it('Creates a factory contract', async () => {
-      try {
-        const response = axios.post('localhost:3000/contracts');
-        Logger.warn(response);
-        assert(true);
-      } catch (err) {
-        assert(false);
-      }
+mocha.describe('/account', () => {
+  mocha.it('Retrieves accounts', async () => {
+    try {
+      const resp = await chai.request(app).get('/account');
+      assert.ok(resp.body.data.accounts);
+    } catch (err) {
+      assert(false);
+    }
+  });
+});
+
+mocha.describe('/contract/factory', () => {
+  mocha.it('Deploys a factory contract', async () => {
+    const acc = (await chai.request(app).get('/account')).body.data.accounts;
+    try {
+      const resp = await chai.request(app).post('/contract/factory').send({
+        account: acc[0],
+        gas: '1000000'
+      });
+      assert.ok(resp.body.isError === false);
+    } catch (err) {
+      Logger.err(err);
+      assert.ok(false);
+    }
+  });
+
+  mocha.it('Deploys a TSP contract', async () => {
+    Logger.err(tspFactory.options.address);
+    const resp = await chai.request(app).post(`/contract/factory/${tspFactory.options.address}`).send({
+      account: accounts[0],
+      gas: '1000000',
+      mongodbAddress: 'somemongodbaddress',
+      size: 10
     });
+    Logger.msg(resp.body);
   });
 });

@@ -64,17 +64,25 @@ contract TSPInstance {
         }
         return 0;
     }
+    
+    /**
+     * Retrieves the address of the deplyoed TSPInstance contract
+    */
+    function getAdress() public view returns(address) {
+        return this;
+    }
 }
 
 contract TSPInstanceFactory {
+    event CreatedTSPInstanceEvent(address contractAddress);
     address[] public deployedTSPInstances;
 
     function TSPInstanceFactory() public payable {}
     
-    function createTSPInstance(uint size, string tspAddress) public payable returns(TSPInstance) {
+    function createTSPInstance(uint size, string tspAddress) public payable {
         TSPInstance newTSPInstance = new TSPInstance(size, tspAddress);
         deployedTSPInstances.push(newTSPInstance);
-        return newTSPInstance;
+        CreatedTSPInstanceEvent(newTSPInstance);
     }
     
     function getDeployedTSPInstances() public view returns(address[])  {
