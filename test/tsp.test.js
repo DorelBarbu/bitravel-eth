@@ -1,28 +1,23 @@
 /* eslint-disable no-plusplus */
 const mocha = require('mocha');
+const axios = require('axios');
 const assert = require('assert');
 const ganache = require('ganache-cli');
 const Web3 = require('web3');
 const fs = require('fs');
 const path = require('path');
+const app = require('../src/routes/router');
 const Logger = require('../logger');
 const Graph = require('../tsp-graph/graph');
 const Node = require('../tsp-graph/node');
 
 const web3 = new Web3(ganache.provider());
 
-const compiledFactoryContractPath = path.resolve(
-  'build',
-  'TSPInstanceFactory.json'
-);
-const compiledFactoryContract = JSON.parse(
-  fs.readFileSync(compiledFactoryContractPath, 'utf8')
-);
+const compiledFactoryContractPath = path.resolve('build', 'TSPInstanceFactory.json');
+const compiledFactoryContract = JSON.parse(fs.readFileSync(compiledFactoryContractPath, 'utf8'));
 
 const compiledTSPPath = path.resolve('build', 'TSPInstance.json');
-const compiledTSPContract = JSON.parse(
-  fs.readFileSync(compiledTSPPath, 'utf8')
-);
+const compiledTSPContract = JSON.parse(fs.readFileSync(compiledTSPPath, 'utf8'));
 
 /* The deployed tsp factory contracts */
 let tspFactory;
@@ -49,9 +44,7 @@ mocha.beforeEach(async () => {
       gas: '1000000'
     });
     /* Get the deployed campaigns */
-    [
-      tspInstanceAddress
-    ] = await tspFactory.methods.getDeployedTSPInstances().call();
+    [tspInstanceAddress] = await tspFactory.methods.getDeployedTSPInstances().call();
     /* Deploy a tsp contract */
     interf = compiledTSPContract.interface;
     // eslint-disable-next-line prefer-destructuring
@@ -87,7 +80,16 @@ mocha.describe('Graph class test', () => {
     const graph = new Graph();
     assert.equal(graph.numberOfNodes, 0);
     assert.equal(graph.numberOfEdges, 0);
-    const cities = ['Bucharest', 'Rome', 'Milano', 'Amsterdam', 'Viena', 'Madrid', 'Venezia', 'Cluj'];
+    const cities = [
+      'Bucharest',
+      'Rome',
+      'Milano',
+      'Amsterdam',
+      'Viena',
+      'Madrid',
+      'Venezia',
+      'Cluj'
+    ];
     const numberOfCities = cities.length;
     let index = 0;
     let cost = 10;
@@ -109,5 +111,19 @@ mocha.describe('Graph class test', () => {
       assert.equal(graph.edges[node].length, numberOfCities - 1);
     }
     assert.equal(distinctNodes, numberOfCities);
+  });
+});
+
+mocha.describe('Contract route', () => {
+  app.listen('3000', () => {
+    mocha.it('Creates a factory contract', async () => {
+      try {
+        const response = axios.post('localhost:3000/contracts');
+        Logger.warn(response);
+        assert(true);
+      } catch (err) {
+        assert(false);
+      }
+    });
   });
 });
