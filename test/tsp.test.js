@@ -137,19 +137,23 @@ mocha.describe('/contract/factory', () => {
       });
       assert.ok(resp.body.isError === false);
     } catch (err) {
-      Logger.err(err);
       assert.ok(false);
     }
   });
 
   mocha.it('Deploys a TSP contract', async () => {
-    Logger.err(tspFactory.options.address);
     const resp = await chai.request(app).post(`/contract/factory/${tspFactory.options.address}`).send({
       account: accounts[0],
       gas: '1000000',
       mongodbAddress: 'somemongodbaddress',
       size: 10
     });
-    Logger.msg(resp.body);
+    assert.ok(resp.body.isError === false);
+  });
+
+  mocha.it('Retrieves deployed instances', async () => {
+    const factoryAddress = tspFactory.options.address;
+    const resp = await chai.request(app).get(`/contract/factory/${factoryAddress}/deployed`);
+    assert.ok(resp.body.isError === false);
   });
 });

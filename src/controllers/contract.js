@@ -7,7 +7,7 @@ const compiledFactoryContract = JSON.parse(fs.readFileSync(compiledFactoryContra
 const interf = compiledFactoryContract.interface;
 const { bytecode } = compiledFactoryContract;
 const Response = require('../utils/response');
-const Logger = require('../../logger');
+//const Logger = require('../../logger');
 
 
 /* Deploys a factory contract to the server */
@@ -24,17 +24,35 @@ const deployFactory = async (account, gas) => {
   return response;
 };
 
+/* Get a deployed TSP contract using its mongodb id */
+const getTSPInstanceByMongoId = async (factoryId, mongoId) => {
+
+};
+
+/* Get the deployed instances of TSP contracts */
+const getDeployedTSPInstances = async factoryAddress => {
+  let response;
+  try {
+    const tspFactory = await new web3.eth.Contract(JSON.parse(interf), factoryAddress);
+    const deployedInstances = await tspFactory.methods.getDeployedTSPInstances().call();
+    response = new Response(false, { deployedInstances }, 'Successfully retrieved deployed instances');
+  } catch (err) {
+    response = new Response(true, null, err.message);
+  }
+  return response;
+};
+
+/* Deploys a factory contract to the server */
 const deployTSP = async (accountAddress, factoryAddress, gas, tspConfig) => {
   const { size, mongodbAddress } = tspConfig;
   let response;
   try {
-    // Logger.msg(factoryAddress);
     const tspFactory = await new web3.eth.Contract(JSON.parse(interf), factoryAddress);
     const tspInstance = await tspFactory.methods.createTSPInstance(size, mongodbAddress).send({
       from: accountAddress,
       gas
     });
-    response = new Response(false, { address: tspInstance.options.address }, 'Successfully created TSP Instance problem');
+    response = new Response(false, { address: tspInstance }, 'Successfully created TSP Instance problem');
   } catch (err) {
     response = new Response(true, null, err.message);
   }
@@ -43,5 +61,6 @@ const deployTSP = async (accountAddress, factoryAddress, gas, tspConfig) => {
 
 module.exports = {
   deployFactory,
-  deployTSP
+  deployTSP,
+  getDeployedTSPInstances
 };
