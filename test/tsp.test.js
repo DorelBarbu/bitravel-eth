@@ -10,6 +10,8 @@ const Logger = require('../logger');
 const Graph = require('../tsp-graph/graph');
 const Node = require('../tsp-graph/node');
 const web3 = require('../src/utils/web3');
+const perm = require('../src/utils/perm');
+
 
 // Configure chai
 chai.use(chaiHttp);
@@ -155,5 +157,24 @@ mocha.describe('/contract/factory', () => {
     const factoryAddress = tspFactory.options.address;
     const resp = await chai.request(app).get(`/contract/factory/${factoryAddress}/deployed`);
     assert.ok(resp.body.isError === false);
+  });
+
+  mocha.it('Retrieves contract by mongodb id', async () => {
+    let resp = await chai.request(app).post(`/contract/factory/${tspFactory.options.address}`).send({
+      account: accounts[0],
+      gas: '1000000',
+      mongodbAddress: 'testmongoid',
+      size: 10
+    });
+    assert.ok(resp.body.isError === false);
+    resp = await chai.request(app).get(`/contract/factory/${tspFactory.options.address}/${'testmongoid'}`);
+    assert.ok(resp.body.isError === false);
+  });
+});
+
+mocha.describe('Mining a contract', () => {
+  mocha.it('Gets the correct permutation', () => {
+    perm(3, 6);
+    assert(true);
   });
 });

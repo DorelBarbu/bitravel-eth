@@ -28,4 +28,10 @@ router.get('/contract/factory/:factoryId/deployed', async (req, res) => {
   res.send(response);
 });
 
+router.get('/contract/factory/:factoryId/:monogId', async (req, res) => {
+  const { monogId, factoryId } = req.params;
+  const response = await controller.getTSPInstanceByMongoId(factoryId, monogId);
+  res.send(response);
+});
+
 module.exports = router;
