@@ -174,7 +174,7 @@ mocha.describe('/contract/factory', () => {
 
 mocha.describe('Mining a contract', () => {
   mocha.it('Gets the correct permutation', () => {
-    perm(3, 6);
+    perm(4, 14);
     assert(true);
   });
 });

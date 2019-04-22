@@ -23,9 +23,21 @@ const getFactoradic = n => {
  * for the set {1, 2, 3, ..., setCardinal}
  */
 const getPerm = (setCardinal, permutationOrder) => {
-  const perm = [];
-  const factoradic = getFactoradic(349);
+  /* Build initial array of {1, 2, 3, ..., setCardinal} */
+  const initialArray = [];
+  for (let i = 0; i < setCardinal; i++) {
+    initialArray.push(i);
+  }
+  /* Build the permutation array */
+  const factoradic = getFactoradic(permutationOrder);
   Logger.msg(factoradic);
+  const perm = [];
+  for (let i = 0; i < factoradic.length; i++) {
+    const elem = factoradic[i];
+    perm.push(initialArray[elem]);
+    initialArray.slice(elem + 1, initialArray.length - 1);
+  }
+  Logger.msg(perm);
   return perm;
 };
 
