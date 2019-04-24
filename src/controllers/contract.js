@@ -10,7 +10,7 @@ const compiledFactoryContract = JSON.parse(fs.readFileSync(compiledFactoryContra
 const interf = compiledFactoryContract.interface;
 const { bytecode } = compiledFactoryContract;
 const Response = require('../utils/response');
-// const Logger = require('../../logger');
+const Logger = require('../../logger');
 
 
 /* Deploys a factory contract to the server */
@@ -92,9 +92,107 @@ const deployTSP = async (accountAddress, factoryAddress, gas, tspConfig) => {
   return response;
 };
 
+/* tsp is a contract */
+const getReward = async tsp => {
+  let response;
+  try {
+    const reward = await tsp.methods.reward().call();
+    response = new Response(false, { reward }, 'Successfully retrieved reward');
+  } catch (err) {
+    response = new Response(true, null, err.message);
+  }
+  return response;
+};
+
+const setReward = async (tsp, reward, account) => {
+  let response;
+  try {
+    await tsp.methods.setReward().send({
+      from: account,
+      value: reward,
+      gas: '1000000'
+    });
+    response = new Response(false, null, 'Successfully set reward');
+  } catch (err) {
+    Logger.err(err.message);
+    response = new Response(true, null, err.message);
+  }
+  return response;
+};
+
+const getMinimumValue = async tsp => {
+  let response;
+  try {
+    const minimumValue = await tsp.methods.minimumCost().call();
+    response = new Response(false, { minimum: minimumValue }, 'Retrieve minimum value success');
+  } catch (err) {
+    response = new Response(true, null, err.message);
+  }
+  return response;
+};
+
+const updateMinimumValue = async (tsp, value, account) => {
+  let response;
+  try {
+    await tsp.methods.updateMinimumCost(value).send({
+      from: account,
+      gas: '1000000'
+    });
+    response = new Response(false, null, 'Update minimum cost success');
+  } catch (err) {
+    response = new Response(true, null, err.message);
+  }
+  return response;
+};
+
+const getIndex = async tsp => {
+  let response;
+  try {
+    const index = await tsp.methods.index().call();
+    response = new Response(false, { index }, 'Retrieve index value success');
+  } catch (err) {
+    response = new Response(true, null, err.message);
+  }
+  return response;
+};
+
+const incrementIndex = async (tsp, account) => {
+  let response;
+  try {
+    await tsp.methods.incrementIndex().send({
+      from: account,
+      gas: '1000000'
+    });
+    response = new Response(false, null, 'Retrieve index value success');
+  } catch (err) {
+    response = new Response(true, null, err.message);
+  }
+  return response;
+};
+
+const getContributors = async tsp => {
+  let response;
+  try {
+    const contributors = await tsp.methods.getContributors().call();
+    response = new Response(false, { contributors }, 'Retrieve get contributors value success');
+  } catch (err) {
+    Logger.err(err.message);
+    response = new Response(true, null, err.message);
+  }
+  return response;
+};
+
+
 module.exports = {
   deployFactory,
   deployTSP,
   getDeployedTSPInstances,
-  getTSPInstanceByMongoId
+  getTSPInstanceByMongoId,
+  getReward,
+  setReward,
+  getMinimumValue,
+  updateMinimumValue,
+  getIndex,
+  getContributors,
+  incrementIndex
 };

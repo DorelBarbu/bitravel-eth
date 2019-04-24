@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
-const Logger = require('../../logger');
+// const Logger = require('../../logger');
 
 /**
  * Returns the factoradic representation of a given numbe.r
@@ -25,19 +25,21 @@ const getFactoradic = n => {
 const getPerm = (setCardinal, permutationOrder) => {
   /* Build initial array of {1, 2, 3, ..., setCardinal} */
   const initialArray = [];
-  for (let i = 0; i < setCardinal; i++) {
+  for (let i = 1; i <= setCardinal; i++) {
     initialArray.push(i);
   }
   /* Build the permutation array */
   const factoradic = getFactoradic(permutationOrder);
-  Logger.msg(factoradic);
   const perm = [];
   for (let i = 0; i < factoradic.length; i++) {
     const elem = factoradic[i];
     perm.push(initialArray[elem]);
-    initialArray.slice(elem + 1, initialArray.length - 1);
+    initialArray.splice(elem, 1);
   }
-  Logger.msg(perm);
+  while (perm.length < setCardinal) {
+    perm.push(initialArray[0]);
+    initialArray.splice(0, 1);
+  }
   return perm;
 };
 

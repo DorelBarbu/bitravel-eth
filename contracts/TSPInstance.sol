@@ -24,7 +24,7 @@ contract TSPInstance {
      * as a miner finds a better solution
      * 
     **/
-    uint minimumCost;
+    uint public minimumCost;
     
     /**
      * Holds the addresses of all the miners that are currently
@@ -48,21 +48,28 @@ contract TSPInstance {
         problemSize = size;
         tspInstanceAddress = tspAddress;
         index = 1;
+        minimumCost = 0;
     }
     
     /**
      * Updates the minimum cost with the result from a miner. The miner has the option
      * to try another possiblity or give up and cash in the reward
     */
-    function updateMinimumCost(uint currentCost, bool tryNextPossiblity) public payable returns(uint) {
-        if(currentCost > minimumCost) {
+    function updateMinimumCost(uint currentCost) public payable {
+        bool alreadyContributed = false;
+        for(uint i = 0; i < contributor.length; i++) {
+            if(contributor[i] == msg.sender) {
+                alreadyContributed = true;
+                break;
+            }
+        }
+        if(alreadyContributed == false) {
+            contributor.push(msg.sender);
+        }
+        contributorEffort[msg.sender]++;
+        if(currentCost < minimumCost || minimumCost == 0) {
             minimumCost = currentCost;
         }
-        if(tryNextPossiblity) {
-            index++;
-            return index;
-        }
-        return 0;
     }
     
     /**
@@ -70,6 +77,22 @@ contract TSPInstance {
     */
     function getAdress() public view returns(address) {
         return this;
+    }
+    
+    function setReward() public payable {
+        reward = msg.value;
+    }
+    
+    function getNumberOfContributors() public view returns(uint) {
+        return contributor.length;
+    }
+    
+    function getContributors() public view returns(address[]) {
+        return contributor;
+    }
+    
+    function incrementIndex() public payable returns(uint) {
+        index++;
     }
 }
 

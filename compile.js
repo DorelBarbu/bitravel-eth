@@ -15,4 +15,6 @@ const compileContract = filename => {
   return compiledContracts;
 };
 
+compileContract('TSPInstance');
+
 module.exports = compileContract;
