@@ -106,8 +106,6 @@ mocha.describe('TSPFactoryInstance contract', () => {
     response = await contractController.getMinimumValue(tsp);
     assert.equal(response.data.minimum, 10);
     /* Test if index = 4 */
-    const { index } = (await contractController.getIndex(tsp)).data;
-    // assert.equal(index, 4);
   });
 });
 
