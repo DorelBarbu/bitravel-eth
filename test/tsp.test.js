@@ -26,6 +26,8 @@ const compiledFactoryContract = JSON.parse(fs.readFileSync(compiledFactoryContra
 const compiledTSPPath = path.resolve('build', 'TSPInstance.json');
 const compiledTSPContract = JSON.parse(fs.readFileSync(compiledTSPPath, 'utf8'));
 
+const cities = ['Viena', 'Madrid', 'Praga', 'Bucharest', 'Lisbon'];
+
 /* The deployed tsp factory contracts */
 let tspFactory;
 /* The deployed tsp contract */
@@ -34,7 +36,8 @@ let tsp;
 let accounts;
 /* The address of the tsp instance */
 let tspInstanceAddress;
-
+/* The test graph */
+let graph;
 
 mocha.beforeEach(async () => {
   accounts = await web3.eth.getAccounts();
@@ -61,6 +64,7 @@ mocha.beforeEach(async () => {
     Logger.err('Error deploying TSP contract');
     Logger.msg(err);
   }
+  graph = generateGraph(cities);
 });
 
 mocha.describe('TSPFactoryInstance contract', () => {
@@ -115,16 +119,6 @@ mocha.describe('Graph class test', () => {
     assert.ok(newNode);
   });
   mocha.it('Creates a graph', () => {
-    const cities = [
-      'Bucharest',
-      'Rome',
-      'Milano',
-      'Amsterdam',
-      'Viena',
-      'Madrid',
-      'Venezia',
-      'Cluj'
-    ];
     generateGraph(cities);
     assert(true);
   });
@@ -181,10 +175,11 @@ mocha.describe('/contract/factory', () => {
     assert.ok(resp.body.isError === false);
     resp = await chai.request(app).get(`/contract/factory/${tspFactory.options.address}/${'testmongoid'}`);
     assert.ok(resp.body.isError === false);
+    assert.ok(resp.body.data.id);
   });
 });
 
-const contribute = async (account, numberOfPossibilities, graph, cities, indexArray) => {
+const contribute = async (account, numberOfPossibilities, indexArray) => {
   for (let i = 1; i <= numberOfPossibilities + 1; i++) {
     const currentIndex = (await contractController.getIndex(tsp)).data.index;
     await contractController.incrementIndex(tsp, account);
@@ -201,10 +196,20 @@ mocha.describe('Mining a contract', () => {
     const permArray = perm(4, 14);
     assert(_.isEqual(expectedPerm, permArray));
   });
-  mocha.it('It contributes to a contract', async () => {
-    /* Generate a test graph */
-    const cities = ['Viena', 'Madrid', 'Praga', 'Bucharest', 'Lisbon'];
-    const graph = generateGraph(cities);
+
+  mocha.it('Contributes to the tsp instance', async () => {
+    const response = await chai.request(app).post(`/contract/${tspInstanceAddress}/contribute`).send({
+      account: accounts[0]
+    });
+    const tspInstance = (await contractController.getTsp(tspInstanceAddress)).data.tspContract;
+    const actualIndex = (await contractController.getIndex(tspInstance)).data.index;
+    const actualMinimumValue = (await contractController.getMinimumValue(tspInstance)).data.minimum;
+    assert.ok(response.body.isError === false);
+    assert.equal(actualIndex, 2);
+    assert.equal(actualMinimumValue, response.body.data.currentCost);
+  });
+
+  mocha.it('It solves the TSP instance problem', async () => {
     /* Test the first few posibilities */
     const numberOfPossibilities = 10;
     /* Compute the expected minimum cost */
@@ -218,7 +223,7 @@ mocha.describe('Mining a contract', () => {
     }
     /* Actually contribute to the contract using two accounts */
     const indexArray1 = [];
-    await contribute(accounts[0], numberOfPossibilities, graph, cities, indexArray1);
+    await contribute(accounts[0], numberOfPossibilities, indexArray1);
     const minimumValue = (await contractController.getMinimumValue(tsp)).data.minimum;
     assert.equal(minimumValue, expectedMinimumCost);
     /* Test number of contributors */

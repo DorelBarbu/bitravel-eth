@@ -1,7 +1,14 @@
 /* eslint-disable no-plusplus */
+const fs = require('fs');
+const path = require('path');
 const Graph = require('./graph');
 const Node = require('./node');
 // const Logger = require('../logger');
+
+const writeGraphToFile = (graph, filename) => {
+  const otuputPath = path.resolve('build', `${filename}.json`);
+  fs.writeFileSync(otuputPath, JSON.stringify(graph));
+};
 
 const generateGraph = cities => {
   const graph = new Graph();
@@ -20,6 +27,7 @@ const generateGraph = cities => {
       }
     }
   }
+  writeGraphToFile(graph, 'graph');
   return graph;
 };
 

@@ -1,12 +1,20 @@
 /* eslint-disable no-plusplus */
 
 class Graph {
-  constructor() {
-    this.numberOfNodes = 0;
-    this.numberOfEdges = 0;
-    this.nodes = [];
-    this.edges = {};
-    this.cost = {};
+  constructor(graph = null) {
+    if (graph) {
+      this.numberOfEdges = graph.numberOfEdges;
+      this.numberOfNodes = graph.numberOfNodes;
+      this.nodes = graph.nodes;
+      this.edges = graph.edges;
+      this.cost = graph.cost;
+    } else {
+      this.numberOfNodes = 0;
+      this.numberOfEdges = 0;
+      this.nodes = [];
+      this.edges = {};
+      this.cost = {};
+    }
   }
   /* Adds an oriented edge from node1 --> node2 */
 

@@ -11,6 +11,8 @@ const interf = compiledFactoryContract.interface;
 const { bytecode } = compiledFactoryContract;
 const Response = require('../utils/response');
 const Logger = require('../../logger');
+const perm = require('../utils/perm');
+const Graph = require('../../tsp-graph/graph');
 
 
 /* Deploys a factory contract to the server */
@@ -23,6 +25,18 @@ const deployFactory = async (account, gas) => {
     response = new Response(false, { address: tspFactory.options.address }, 'Successfully deployed TSP factory contract');
   } catch (err) {
     response = new Response(true, [], err.message);
+  }
+  return response;
+};
+
+const getTsp = async address => {
+  let response;
+  try {
+    const tspContract = await new web3.eth.Contract(JSON.parse(compiledTspInstance.interface),
+      address);
+    response = new Response(false, { tspContract }, 'Successfully retrieved deployed tsp instance');
+  } catch (err) {
+    response = new Response(true, null, err.message);
   }
   return response;
 };
@@ -182,6 +196,29 @@ const getContributors = async tsp => {
   return response;
 };
 
+const getGraph = async () => {
+  const graph = fs.readFileSync(path.resolve('build', 'graph.json'));
+  return JSON.parse(graph);
+};
+
+const contribute = async (tspAddress, account) => {
+  let response;
+  try {
+    const tsp = (await getTsp(tspAddress)).data.tspContract;
+    const currentIndex = (await getIndex(tsp)).data.index;
+    await incrementIndex(tsp, account);
+    const graph = new Graph(await getGraph());
+    const graphSize = 5;
+    const currentPermutation = perm(graphSize, currentIndex);
+    const currentCost = graph.getCostPath(currentPermutation);
+    await updateMinimumValue(tsp, currentCost, account);
+    response = new Response(false, { currentIndex, currentPermutation, currentCost }, 'Successfully contribute');
+  } catch (err) {
+    response = new Response(true, null, err.message);
+  }
+  return response;
+};
+
 
 module.exports = {
   deployFactory,
@@ -194,5 +231,7 @@ module.exports = {
   updateMinimumValue,
   getIndex,
   getContributors,
-  incrementIndex
+  incrementIndex,
+  contribute,
+  getTsp
 };

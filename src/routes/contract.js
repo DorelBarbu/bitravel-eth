@@ -34,4 +34,11 @@ router.get('/contract/factory/:factoryId/:monogId', async (req, res) => {
   res.send(response);
 });
 
+router.post('/contract/:contractId/contribute', async (req, res) => {
+  const { contractId } = req.params;
+  const { account } = req.body;
+  const response = await controller.contribute(contractId, account);
+  res.send(response);
+});
+
 module.exports = router;
