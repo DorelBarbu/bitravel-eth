@@ -41,4 +41,12 @@ router.post('/contract/:contractId/contribute', async (req, res) => {
   res.send(response);
 });
 
+router.get('/contract/abi/:contractType', async (req, res) => {
+  const { contractType } = req.params;
+  const response = controller.getContractABI(contractType);
+  // console.warn('contract type: ', contractType);
+  // console.log(response);
+  res.send(response);
+});
+
 module.exports = router;
