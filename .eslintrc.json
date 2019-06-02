@@ -22,6 +22,10 @@
     "arrow-parens": 0,
     "guard-for-in": "off",
     "no-restricted-syntax": "off",
-    "quote-props": "off"
+    "quote-props": "off",
+    "indent": [
+      "error",
+      2
+    ]
   }
 }

@@ -221,12 +221,12 @@ const contribute = async (tspAddress, account) => {
 
 const getContractABI = contractType => {
   switch (contractType) {
-    case 'tsp':
-      return new Response(false, compiledTspInstance, 'Successfully retrieved contract ABI');
-    case 'factory':
-      return new Response(false, compiledFactoryContract, 'Successfully retrieved contract ABI');
-    default:
-      return new Response(true, null, 'Contract type not recognized');
+  case 'tsp':
+    return new Response(false, compiledTspInstance, 'Successfully retrieved contract ABI');
+  case 'factory':
+    return new Response(false, compiledFactoryContract, 'Successfully retrieved contract ABI');
+  default:
+    return new Response(true, null, 'Contract type not recognized');
   }
 };
 

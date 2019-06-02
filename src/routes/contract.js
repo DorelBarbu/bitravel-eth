@@ -49,4 +49,8 @@ router.get('/contract/abi/:contractType', async (req, res) => {
   res.send(response);
 });
 
+router.get('/', async (req, res) => {
+  res.send('bitravel-eth server is up');
+});
+
 module.exports = router;

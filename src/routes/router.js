@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const compileRouter = require('./compile');
 const contractRouter = require('./contract');
@@ -6,7 +7,7 @@ const ethAccountRouter = require('./eth-account');
 // const requireParams = require('../middlewares/require-params');
 
 const app = express();
-
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
