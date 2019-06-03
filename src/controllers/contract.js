@@ -41,6 +41,25 @@ const getTsp = async address => {
   return response;
 };
 
+const getTspContractInfo = async address => {
+  let response;
+  try {
+    const contract = (await getTsp(address)).data.tspContract;
+    const reward = await contract.methods.reward().call();
+    const size = await contract.methods.problemSize().call();
+    const tspInstanceAddress = await contract.methods.tspInstanceAddress().call();
+    response = new Response(false, {
+      contractAddress: contract.options.address,
+      reward,
+      size,
+      tspInstanceAddress
+    }, 'Successfully retrieved contract information');
+  } catch (err) {
+    response = new Response(true, null, err.message);
+  }
+  return response;
+};
+
 /* Get the deployed instances of TSP contracts */
 const getDeployedTSPInstances = async factoryAddress => {
   let response;
@@ -245,5 +264,6 @@ module.exports = {
   incrementIndex,
   contribute,
   getTsp,
-  getContractABI
+  getContractABI,
+  getTspContractInfo
 };

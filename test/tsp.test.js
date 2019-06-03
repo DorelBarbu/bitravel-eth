@@ -78,6 +78,11 @@ mocha.describe('TSPFactoryInstance contract', () => {
     const { reward } = (await contractController.getReward(tsp)).data;
     assert.equal(reward, 0);
   });
+  /* Tests if returns the contract infromation for a tsp address */
+  mocha.it('Retrieve contract information for tsp address', async () => {
+    const response = (await chai.request(app).get(`/contract/tsp/${tsp.options.address}`)).body;
+    assert.ok(response.isError === false);
+  });
   /* Tests to see if we can successfully deploy a TSPInstance contract using TSPInstanceFactory */
   mocha.it('Deploys using TSPFactory', () => {
     assert.equal(tsp.options.address, tspInstanceAddress);

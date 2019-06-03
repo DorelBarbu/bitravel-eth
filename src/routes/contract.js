@@ -28,6 +28,12 @@ router.get('/contract/factory/:factoryId/deployed', async (req, res) => {
   res.send(response);
 });
 
+router.get('/contract/tsp/:address', async (req,res) => {
+  const { address } = req.params;
+  const response = await controller.getTspContractInfo(address);
+  res.send(response);
+});
+
 router.get('/contract/factory/:factoryId/:monogId', async (req, res) => {
   const { monogId, factoryId } = req.params;
   const response = await controller.getTSPInstanceByMongoId(factoryId, monogId);
