@@ -65,7 +65,14 @@ const getDeployedTSPInstances = async factoryAddress => {
   let response;
   try {
     const tspFactory = await new web3.eth.Contract(JSON.parse(interf), factoryAddress);
-    const deployedInstances = await tspFactory.methods.getDeployedTSPInstances().call();
+    const contractAddresses = await tspFactory.methods.getDeployedTSPInstances().call();
+    let deployedInstances = [];
+    // eslint-disable-next-line max-len
+    contractAddresses.forEach(address => {
+      deployedInstances.push(getTspContractInfo(address));
+    });
+    deployedInstances = await Promise.all(deployedInstances);
+    deployedInstances = deployedInstances.map(elem => elem.data);
     response = new Response(false, { deployedInstances }, 'Successfully retrieved deployed instances');
   } catch (err) {
     response = new Response(true, null, err.message);
@@ -84,7 +91,7 @@ const getTSPInstanceByMongoId = async (factoryId, mongoId) => {
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < deployedContracts.length; i++) {
       const tspInterf = JSON.parse(compiledTspInstance.interface);
-      contracts.push(new web3.eth.Contract(tspInterf, deployedContracts[i]));
+      contracts.push(new web3.eth.Contract(tspInterf, deployedContracts[i].contractAddress));
     }
     contracts = await Promise.all(contracts);
     /* Get the mongodb id for each deployed contract */
@@ -97,7 +104,7 @@ const getTSPInstanceByMongoId = async (factoryId, mongoId) => {
     let contractId;
     for (let i = 0; i < mongodbArray.length; i++) {
       if (mongodbArray[i] === mongoId) {
-        contractId = deployedContracts[i];
+        contractId = deployedContracts[i].contractAddress;
         break;
       }
     }
@@ -118,7 +125,9 @@ const deployTSP = async (accountAddress, factoryAddress, gas, tspConfig) => {
       from: accountAddress,
       gas
     });
-    response = new Response(false, { address: tspInstance }, 'Successfully created TSP Instance problem');
+    response = new Response(false, {
+      address: tspInstance.events.CreatedTSPInstanceEvent.returnValues.contractAddress
+    }, 'Successfully created TSP Instance problem');
   } catch (err) {
     response = new Response(true, null, err.message);
   }

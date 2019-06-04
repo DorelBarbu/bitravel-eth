@@ -161,6 +161,7 @@ mocha.describe('/contract/factory', () => {
       mongodbAddress: 'somemongodbaddress',
       size: 10
     });
+    assert.ok(resp.body.data.address);
     assert.ok(resp.body.isError === false);
   });
 
@@ -180,7 +181,6 @@ mocha.describe('/contract/factory', () => {
     assert.ok(resp.body.isError === false);
     resp = await chai.request(app).get(`/contract/factory/${tspFactory.options.address}/${'testmongoid'}`);
     assert.ok(resp.body.isError === false);
-    assert.ok(resp.body.data.id);
   });
 });
 
@@ -212,6 +212,17 @@ mocha.describe('Mining a contract', () => {
     assert.ok(response.body.isError === false);
     assert.equal(actualIndex, 2);
     assert.equal(actualMinimumValue, response.body.data.currentCost);
+  });
+
+  mocha.it('Sets the reward for a tsp instance', async () => {
+    const response = await chai.request(app).post(`/contract/${tspInstanceAddress}/reward`).send({
+      reward: 20,
+      accountId: accounts[0]
+    });
+    assert.ok(response.body.isError === false);
+    const contract = (await contractController.getTsp(tspInstanceAddress)).data.tspContract;
+    const { reward } = (await contractController.getReward(contract)).data;
+    assert.ok(reward === '20');
   });
 
   mocha.it('It solves the TSP instance problem', async () => {

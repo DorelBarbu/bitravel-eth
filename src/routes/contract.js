@@ -28,7 +28,7 @@ router.get('/contract/factory/:factoryId/deployed', async (req, res) => {
   res.send(response);
 });
 
-router.get('/contract/tsp/:address', async (req,res) => {
+router.get('/contract/tsp/:address', async (req, res) => {
   const { address } = req.params;
   const response = await controller.getTspContractInfo(address);
   res.send(response);
@@ -57,6 +57,14 @@ router.get('/contract/abi/:contractType', async (req, res) => {
 
 router.get('/', async (req, res) => {
   res.send('bitravel-eth server is up');
+});
+
+router.post('/contract/:contractId/reward', async (req, res) => {
+  const { reward, accountId } = req.body;
+  const { contractId } = req.params;
+  const contract = (await controller.getTsp(contractId)).data.tspContract;
+  const response = await controller.setReward(contract, reward, accountId);
+  res.send(response);
 });
 
 module.exports = router;
